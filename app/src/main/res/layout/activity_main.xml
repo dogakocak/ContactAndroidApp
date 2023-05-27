@@ -12,6 +12,7 @@
         android:layout_marginTop="656dp"
         android:layout_marginEnd="16dp"
         android:src="@drawable/baseline_person_add_24"
+        android:contentDescription="Add Person Button"
         app:tint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
