@@ -17,7 +17,7 @@ public class AddEditContactActivity extends AppCompatActivity {
 
     private Button addButton;
 
-    final static String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+    private final static String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
 
     String name,phone,email;
 
