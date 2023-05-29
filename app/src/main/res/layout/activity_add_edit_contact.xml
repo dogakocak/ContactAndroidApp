@@ -19,6 +19,8 @@
             android:layout_gravity="center"
             android:src="@drawable/baseline_person_24"
             android:tint="@color/white"
+            android:onClick="clickImage"
+            android:contentDescription="Image"
             app:civ_border_color="@color/colorPrimary"
             app:civ_border_width="@dimen/_1sdp" />
 
