@@ -1,12 +1,12 @@
 package com.example.contacts;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,8 +14,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class AddEditContactActivity extends AppCompatActivity {
 
@@ -28,6 +33,8 @@ public class AddEditContactActivity extends AppCompatActivity {
     private final static int STORAGE_PERMISSION_CODE = 200;
     private final static int IMAGE_FROM_GALLERY_CODE = 300;
     private final static int IMAGE_FROM_CAMERA_CODE = 400;
+
+    private ActivityResultLauncher<Intent> galleryLauncher;
 
     private String[] cameraPermission;
     private String[] storagePermission;
@@ -47,6 +54,8 @@ public class AddEditContactActivity extends AppCompatActivity {
         phoneEt = findViewById(R.id.phoneEditText);
         emailEt = findViewById(R.id.emailEditText);
         addButton = findViewById(R.id.addButton);
+
+
 
 
     }
@@ -72,6 +81,59 @@ public class AddEditContactActivity extends AppCompatActivity {
 
     }
 
+    public void clickImage(View view){
+        showImagePickerDialog();
+    }
+
+    public void showImagePickerDialog(){
+        String[] options = {"Camera", "Gallery"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Choose an optiom");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (i == 0){
+                    Log.d("INFO: ","Camera selected");
+                    if(!checkCameraPermission()){
+                        requestCameraPermission();
+                    }else{
+                        pickFromCamera();
+                    }
+                }
+                else if (i == 1){
+                    Log.d("INFO", "Gallery selected");
+                    if(!checkStoragePermission()){
+                        requestStoragePermission();
+                    }else{
+                        pickFromGallery();
+                    }
+                }
+
+            }
+        }).create().show();
+
+    }
+
+    private void pickFromGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, IMAGE_FROM_GALLERY_CODE);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null){
+            Uri selectedImage = data.getData();
+            profilePhoto.setImageURI(selectedImage);
+        }
+    }
+
+    private void pickFromCamera() {
+        Log.d("INFO","pickFromCamera()");
+
+    }
 
 
     private boolean checkCameraPermission(){
@@ -96,5 +158,34 @@ public class AddEditContactActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this,storagePermission, STORAGE_PERMISSION_CODE);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        switch (requestCode){
+            case CAMERA_PERMISSION_CODE:
+                if (grantResults.length > 0){
+                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                    if (cameraAccepted && storageAccepted){
+                        pickFromCamera();
+                    }else {
+                        Toast.makeText(this, "Camera and Storage permission needed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            case STORAGE_PERMISSION_CODE:
+                if (grantResults.length > 0){
+                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+                    if(storageAccepted){
+                        pickFromGallery();
+                    }else{
+                        Toast.makeText(this, "Storage permission needed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+        }
+    }
 }
